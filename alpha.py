@@ -1,9 +1,10 @@
 #!/usr/bin/python3.6
 import json
-import sys
 # define an example stp_domain to work with
-# each link is described by the use of following pattern :
-# (switch that this link leads to): [(cost of the link), (root path cost), (port role), (port priority), (port id)]
+
+# each link is described by the use of a following pattern :
+# (switch that this link leads to): [(cost of the link), (root path cost), (port role), (port priority), (port id), (device name)]
+
 # Ports Roles : 
 # RP = root port
 # DP = designated port
@@ -11,7 +12,7 @@ import sys
 
 stp_domain = {}
 
-with open("stp_domains/3_switch.json", "r") as infile:
+with open("stp_domains/domain4.json", "r") as infile:
     stp_domain = json.load(infile)
 #print(stp_domain)
 
