@@ -15,26 +15,22 @@ class STPUtils():
         derived from a provided json file.
         The data is presented in a dictionary format
         """
-        success = False
-        while success == False:
-            filename = self.verifyInput()
-            try:
+        filename = self.verifyInput()
+        try:
                
-                ifile = os.path.join("stp_domains", f"{filename}.json")
-                with open(ifile, "r") as infile:
-                    print("\n[+] Input file was successfully loaded")
-                    return json.load(infile)
-                success = True
-            except FileNotFoundError:
-                try: 
-                    filename = filename.split('.')[1]
-                    if filename == 'json':
-                        print("\n[-] Try providing a file name without a .json")
-                except IndexError:
-                    print( "\n[-] Provided file does not exist inside of stp_domains directory")
-                    if len(sys.argv) < 2:
-                        exit(0)
-
+            ifile = os.path.join("stp_domains", f"{filename}.json")
+            with open(ifile, "r") as infile:
+                print("\n[+] Input file was successfully loaded")
+                return json.load(infile)
+        except FileNotFoundError:
+            try: 
+                filename = filename.split('.')[1]
+                if filename == 'json':
+                    print("\n[-] Try providing a file name without a .json")
+                    exit(1)
+            except IndexError:
+                 print( "\n[-] Provided file does not exist inside of stp_domains directory")
+                 exit(2)
     def keyboardInterruptHandler(self, signal, frame):
         """
         This function gratiously handles a SIGINT (Ctrl-C)
@@ -47,7 +43,6 @@ class STPUtils():
         Functions provides an output file in a json format
         based on a provided dictionary
         """
-        #filename = f"{ofileName}.json"
         try:
             filename = os.path.join("results", f"{ofileName}.json")
             with open(filename, "w") as outfile:
@@ -64,7 +59,7 @@ class STPUtils():
         """
         filename= ''
         try: 
-         filename =  sys.argv[1]
+            filename =  sys.argv[1]
         except IndexError:
             while not filename:
                 filename = input("\nPlease provide a name of the file: ")
