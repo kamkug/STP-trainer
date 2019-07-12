@@ -15,25 +15,22 @@ class STPUtils():
         derived from a provided json file.
         The data is presented in a dictionary format
         """
-        success = False
-        while success == False:
-            filename = self.verifyInput()
-            try:
+        filename = self.verifyInput()
+        try:
                
-                ifile = os.path.join("stp_domains", f"{filename}.json")
-                with open(ifile, "r") as infile:
-                    print("\n[+] Input file was successfully loaded")
-                    return json.load(infile)
-                success = True
-            except FileNotFoundError:
-                try: 
-                    filename = filename.split('.')[1]
-                    if filename == 'json':
-                        print("\n[-] Try providing a file name without a .json")
-                except IndexError:
-                    print( "\n[-] Provided file does not exist inside of stp_domains directory")
-                    if len(sys.argv) < 2:
-                        exit(0)
+            ifile = os.path.join("stp_domains", f"{filename}.json")
+            with open(ifile, "r") as infile:
+                print("\n[+] Input file was successfully loaded")
+                return json.load(infile)
+        except FileNotFoundError:
+            try: 
+                filename = filename.split('.')[1]
+                if filename == 'json':
+                    print("\n[-] Try providing a file name without a .json")
+                    exit(1)
+            except IndexError:
+                 print( "\n[-] Provided file does not exist inside of stp_domains directory")
+                 exit(2)
 
     def keyboardInterruptHandler(self, signal, frame):
         """
