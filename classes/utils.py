@@ -6,6 +6,7 @@ import os
 class STPUtils():
     def __init__(self):
         print("[+] The STPUtils successfully loaded")
+        # start listening for a SIGINT
         signal.signal(signal.SIGINT, self.keyboardInterruptHandler)
     
     def getInfile(self, filename):
@@ -18,8 +19,8 @@ class STPUtils():
         while success == False:
             filename = self.verifyInput()
             try:
-                os.path.dirname('STP-802.1D')
-                ifile = f"stp_domains/{filename}.json"
+               
+                ifile = os.path.join("stp_domains", f"{filename}.json")
                 with open(ifile, "r") as infile:
                     print("\n[+] Input file was successfully loaded")
                     return json.load(infile)
@@ -28,10 +29,11 @@ class STPUtils():
                 try: 
                     filename = filename.split('.')[1]
                     if filename == 'json':
-                        print("\n[+] Try providing a file name without a .json")
+                        print("\n[-] Try providing a file name without a .json")
                 except IndexError:
-                    print( "\n[-] Provided file does not exist inside of stp_domain directory")
-
+                    print( "\n[-] Provided file does not exist inside of stp_domains directory")
+                    if len(sys.argv) < 2:
+                        exit(0)
 
     def keyboardInterruptHandler(self, signal, frame):
         """
@@ -45,10 +47,10 @@ class STPUtils():
         Functions provides an output file in a json format
         based on a provided dictionary
         """
-        filename = f"results/{ofileName}.json"
+        #filename = f"{ofileName}.json"
         try:
-         os.path.dirname("STP-802.1D")
-         with open(filename, "w") as outfile:
+            filename = os.path.join("results", f"{ofileName}.json")
+            with open(filename, "w") as outfile:
                 json.dump(results, outfile)
                 print("[+] File was successfully created")
         except FileNotFoundError:
@@ -61,8 +63,7 @@ class STPUtils():
         and than returns this input.
         """
         filename= ''
-        try:
-        
+        try: 
          filename =  sys.argv[1]
         except IndexError:
             while not filename:

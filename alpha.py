@@ -4,6 +4,7 @@
 #import signa
 from classes.utils import STPUtils
 import sys
+import os
 # define an example stp_domain to work with
 
 # each link is described by the use of a following pattern :
@@ -23,7 +24,6 @@ try:
 except  EOFError:
     print("\n[Ctrl-D] Shutting down...")
     exit(1)
-
 
 
 counter = 65536255
