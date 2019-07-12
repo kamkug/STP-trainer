@@ -1,5 +1,9 @@
 #!/usr/bin/python3.6
-import json
+#import json
+#import sys
+#import signa
+from classes.utils import *
+import os
 # define an example stp_domain to work with
 
 # each link is described by the use of a following pattern :
@@ -10,11 +14,17 @@ import json
 # DP = designated port
 # BP = blocking port
 
-stp_domain = {}
+#stp_domain = {}
 
-with open("stp_domains/domain4.json", "r") as infile:
-    stp_domain = json.load(infile)
-#print(stp_domain)
+# verify that Ctrl-D has not been issued
+try:
+    utils = STPUtils()
+    stp_domain = utils.getInfile(sys.argv)
+except  EOFError:
+    print("\n[Ctrl-D] Shutting down...")
+    exit(1)
+
+
 
 counter = 65536255
 root_bridge = ''
@@ -222,6 +232,5 @@ for switch_name in stp_domain:
     print("Blocking ports: ", ', '.join(blocking_ports) if blocking_ports else "None")
     print(40 * '-')
 
-with open("results/result.json", "w") as ofile:
-    json.dump(stp_domain, ofile)
-
+# Provide an output file
+utils.provideOutfile(stp_domain, "test123")
