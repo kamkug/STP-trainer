@@ -2,8 +2,8 @@
 #import json
 #import sys
 #import signa
-from classes.utils import *
-import os
+from classes.utils import STPUtils
+import sys
 # define an example stp_domain to work with
 
 # each link is described by the use of a following pattern :

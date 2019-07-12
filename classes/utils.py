@@ -20,7 +20,6 @@ class STPUtils():
             try:
                 os.path.dirname('STP-802.1D')
                 ifile = f"stp_domains/{filename}.json"
-                print(ifile)
                 with open(ifile, "r") as infile:
                     print("\n[+] Input file was successfully loaded")
                     return json.load(infile)
