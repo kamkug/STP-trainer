@@ -35,58 +35,198 @@ for switch in stp_domain:
         root_bridge = switch
         counter = stp_domain[switch]["bridgeID"]
 
+print(root_bridge)
+def setRootBridge(stp_domain):
+    """
+    Functions finds the root bridge amongst all switches in the domain
+    """
+    #set max possible bridge ID
+    counter = 65536255
+    root_bridge = ''
+    for switchName in stp_domain:
+        switch = stp_domain[switchName]
+        if switch["bridgeID"] < counter:
+            root_bridge = switchName
+            counter = stp_domain[switchName]["bridgeID"]
+    return root_bridge
+ 
+
+#print(root_bridge)
+
+def setRoles(root_bridge, stp_domain):
+    """
+    Function sets the roles for all bridges (root|non-root)
+    """
+    for switch_name in stp_domain:
+        switch = stp_domain[switch_name]
+        switch["role"] = "root" if switch_name == root_bridge else "non-root"
+        if switch["role"] == "root":
+            for key in switch.keys():
+                  if key.startswith('s'):
+                    switch[key][2] = "DP"
+    return stp_domain
+
+def defineSwitchType(stp_domain):
+    """
+    Function updates the lowest cost for switches that are directly connected to the root bridge
+     and figures out who is/isn't directly connected
+    """
+    #create two holders
+    directly_connected = []
+    not_directly_connected = []
+    for switch in stp_domain:
+        if root_bridge in stp_domain[switch]:
+            stp_domain[switch][root_bridge][1] = stp_domain[switch][root_bridge][0]
+            stp_domain[switch]["lowest"] = root_bridge
+            stp_domain[switch][root_bridge][2] = "RP"
+            directly_connected.append(switch)
+        elif switch != root_bridge:
+            not_directly_connected.append(switch)  
+    return directly_connected, not_directly_connected, stp_domain
+
+def setDictionaryOfSwitches(switches_list):
+    # creating a dictionary of directly connected devices
+    return  { switches_list[index]:stp_domain[switches_list[index]] for index in range (len(switches_list))}
+
+def calculateCostThroughNeighbor(neighbor_name, local, root_bridge):
+    lowest_current_local_root_path_cost = local[local["lowest"]][1]
+    link_to_neighbor_cost = local[neighbor_name][0] 
+    neighbor_root_path_cost = directly_connected_dict[neighbor_name][root_bridge][1] 
+    local[neighbor_name][1] = link_to_neighbor_cost + neighbor_root_path_cost
+    root_path_cost_through_neighbor = local[neighbor_name][1]
+    return root_path_cost_through_neighbor < lowest_current_local_root_path_cost
+                
+        
+def setRootPathCostForDirectlyConnected(switches_dict, switches_list, root_bridge):
+    for local_name in switches_dict:
+        for neighbor_name in switches_list:
+            local = switches_dict[local_name] 
+            if neighbor_name in local:
+                result = calculateCostThroughNeighbor(neighbor_name, local, root_bridge)
+                if result:
+                    local[root_bridge][2] = "none"
+                    local["lowest"] = neighbor_name
+                    local[neighbor_name][2] = "RP"
+    return switches_dict
+
+def setNewRootPort(local, neighbor_name, reset=True):
+    if reset:
+        local[local["lowest"]][2] = "none"    # reset the root port if necessary
+    local["lowest"] = neighbor_name           # name the lowest switch appropriately
+    local[local["lowest"]][2] = "RP"          # define a new root port
+
+def setRootPathCostForNotDirectlyConnected(not_directly_connected_dict, directly_connected_dict, stp_domain):
+    """
+    Function is setting the remaining root ports on both type of switches (connected|not connected)
+    """
+    for local_name in not_directly_connected_dict:
+        local = not_directly_connected_dict[local_name]
+        for neighbor_name in directly_connected_dict:
+            neighbor = directly_connected_dict[neighbor_name]
+            if neighbor_name in local:
+                # local to neighbor cost + neighbor to root bridge cost
+                link_to_neighbor_cost = local[neighbor_name][0]
+                neighbors_root_path_cost = neighbor[neighbor["lowest"]][1]
+                local[neighbor_name][1] = link_to_neighbor_cost + neighbors_root_path_cost
+                if local["lowest"] == '':  # add initial root port if none exist
+                    setNewRootPort(local, neighbor_name, False)
+                elif local[local["lowest"]][1] == "RP":                                                         # in case of a cost tie
+                    if stp_domain[local["lowest"]]["bridgeID"] > stp_domain[neighbor_name]["bridgeID"]:         # look at the bridge ID of neighboring switches, the lower one wins
+                        setNewRootPort(local, neighbor_name)    
+                elif local[local["lowest"]][1] == "RP" or local[local["lowest"]][1] > local[neighbor_name][1] \
+                     or local[local["lowest"]][1] < neighbor[neighbor["lowest"]][1]:    # if appropriate port is already set to the lowest or if a local lowest is smaller than the neighbors lowest
+                    setNewRootPort(local, neighbor_name)
+    return not_directly_connected, stp_domain
+ 
+def verifyCostBetweenNotDirectlyConnectedDevices(not_directly_connected_dict):
+
+    for local_name in not_directly_connected_dict:
+        local = not_directly_connected_dict[local_name]  # get a local machine information
+        for neighbor_name in not_directly_connected_dict:
+            neighbor = not_directly_connected_dict[neighbor_name] # get a neighboring machine name
+            if neighbor_name in local:
+                link_to_neighbor_cost = local[neighbor_name][0]
+                neighbor_root_path_cost = neighbor[neighbor["lowest"]][1]
+                local[neighbor_name][1] = link_to_neighbor_cost + neighbor_root_path_cost
+                if local["lowest"] == '':    # add inital RP if none exist 
+                    setNewRootPort(local, neighbor_name, False)
+                elif local[local["lowest"]][1] == local[neighbor_name][1]:                                  # in case of a cost tie
+                    if stp_domain[local["lowest"]]["bridgeID"] > stp_domain[neighbor_name]["bridgeID"]:     # look at the bidge ID of neighboring switches, the lower one wins
+                        setNewRootPort(local, neighbor_name)                                                # re-assign appropriate roles (if necessary)
+                elif local[local["lowest"]][1] > local[neighbor_name][1]:    # if the local lowest distance is bigger than the Root path cost for the neighboring switch
+                    setNewRootPort(local, neighbor_name)                     # reset the root port and subsequently define a correct one   return not_directly_connected_dict
+
 
 # set the roles for all bridges (root|non-root)
-for switch_name in stp_domain:
-    switch = stp_domain[switch_name]
-    switch["role"] = "root" if switch_name == root_bridge else "non-root"
-    if switch["role"] == "root":
-        for key in switch.keys():
-            if key.startswith('s'):
-                switch[key][2] = "DP"
+#for switch_name in stp_domain:
+#    switch = stp_domain[switch_name]
+#    switch["role"] = "root" if switch_name == root_bridge else "non-root"
+#    if switch["role"] == "root":
+#        for key in switch.keys():
+#              if key.startswith('s'):
+#                switch[key][2] = "DP"
+#return stp_domain
 
+#actual program
+root_bridge = setRootBridge(stp_domain)
+stp_domain = setRoles(root_bridge, stp_domain)
+directly_connected, not_directly_connected, stp_domain = defineSwitchType(stp_domain)
+directly_connected_dict = setDictionaryOfSwitches(directly_connected)
+directly_connected_dict = setRootPathCostForDirectlyConnected(directly_connected_dict, directly_connected, root_bridge)
+# creating a dictionary of not directly connected devices
+not_directly_connected_dict = setDictionaryOfSwitches(not_directly_connected)
+setRootPathCostForNotDirectlyConnected(not_directly_connected_dict, directly_connected_dict, stp_domain)
+verifyCostBetweenNotDirectlyConnectedDevices(not_directly_connected_dict) 
 # create two holders
-directly_connected = []
-not_directly_connected = []
+#directly_connected = []
+#not_directly_connected = []
 # update lowest cost for switches directly connected to the root bridge
 # and find out who is/isn't directly connected
-for switch in stp_domain:
-    if root_bridge in stp_domain[switch]:
-        stp_domain[switch][root_bridge][1] = stp_domain[switch][root_bridge][0]
-        stp_domain[switch]["lowest"] = root_bridge
-        stp_domain[switch][root_bridge][2] = "RP"
-        directly_connected.append(switch)
-    elif switch != root_bridge:
-        not_directly_connected.append(switch)
-
+#for switch in stp_domain:
+#    if root_bridge in stp_domain[switch]:
+#        stp_domain[switch][root_bridge][1] = stp_domain[switch][root_bridge][0]
+#        stp_domain[switch]["lowest"] = root_bridge
+#        stp_domain[switch][root_bridge][2] = "RP"
+#        directly_connected.append(switch)
+#    elif switch != root_bridge:
+#        not_directly_connected.append(switch)
+#"""
 # creating a dictionary of directly connected devices
-directly_connected_dict = { directly_connected[index]:stp_domain[directly_connected[index]] for index in range (len(directly_connected))}
+#directly_connected_dict = { directly_connected[index]:stp_domain[directly_connected[index]] for index in range (len(directly_connected))}
 
 # creating a dictionary of not directly connected devices
 #not_directly_connected_dict = {not_directly_connected[index]:stp_domain[not_directly_connected[index]] for index in range (len(not_directly_connected))}
 #print(directly_connected_dict)
+
 # define root path cost for all of directly connected devices
-for localised in directly_connected_dict:
-    for neighbor in directly_connected:
-        local = directly_connected_dict[localised] #for simpler naming
-        if neighbor in local:
-        # local to neighbor cost + neighbor to root bridge cost
-            link_to_neighbor_cost = local[neighbor][0]
-            neighbors_root_path_cost = directly_connected_dict[neighbor][root_bridge][1]
-            local[neighbor][1] = link_to_neighbor_cost + neighbors_root_path_cost #get the root path cost on this outgoing port
+
+
+#print(directly_connected_dict)
+#for localised in directly_connected_dict:
+#for localised in directly_connected_dict:
+#    for neighbor in directly_connected:
+#        local = directly_connected_dict[localised] #for simpler naming
+#        if neighbor in local:
+            # local to neighbor cost + neighbor to root bridge cost
+#            link_to_neighbor_cost = local[neighbor][0]
+#            neighbors_root_path_cost = directly_connected_dict[neighbor][root_bridge][1]
+
+ #           local[neighbor][1] = link_to_neighbor_cost + neighbors_root_path_cost #get the root path cost on this outgoing port
            # print("Lowest right now is: ", local[local["lowest"]][1])
             # define an active root port
-            if local[neighbor][1] < local[local["lowest"]][1]: #local[root_bridge][1]: #<---- new
-                local[root_bridge][2] = "none" 
-                local["lowest"] = neighbor      # define a label for a root port
-                local[neighbor][2]="RP"   # define a role as a root port
+#            if local[neighbor][1] < local[local["lowest"]][1]: #local[root_bridge][1]: #<---- new
+#                local[root_bridge][2] = "none" 
+#                local["lowest"] = neighbor      # define a label for a root port
+#                local[neighbor][2]="RP"   # define a role as a root port
 
+#print(directly_connected_dict)
+#"""
 #if len(not_directly_connected) >= 1: # important check of whether not directly devices actually exist !!
 #    print(not_directly_connected)
-# creating a dictionary of not directly connected devices
-not_directly_connected_dict = {not_directly_connected[index]:stp_domain[not_directly_connected[index]] for index in range (len(not_directly_connected))}
+#not_directly_connected_dict = {not_directly_connected[index]:stp_domain[not_directly_connected[index]] for index in range (len(not_directly_connected))}
 #testing
 #print(stp_domain["s6"])
+"""
 for localised in not_directly_connected_dict:
     local = not_directly_connected_dict[localised] # get a dictionary with a useful name that relates to a local switch
     for neighbor_name in directly_connected_dict: 
@@ -114,8 +254,7 @@ for localised in not_directly_connected_dict:
             elif local[local["lowest"]][1] < neighbor[neighbor["lowest"]][1]: 
                 neighbor[neighbor["lowest"]][2] = "none"
                 neighbor["lowest"] = localised
-                neighbor[neighbor["lowest"]][2] = "RP" 
-                
+                neighbor[neighbor["lowest"]][2] = "RP"                 
 
 # for the designated ports sake check the cost between the not directly connected neighbors
 for localised in not_directly_connected_dict:
@@ -141,7 +280,7 @@ for localised in not_directly_connected_dict:
                 local[local["lowest"]][2] = "none"  # reset the root port and subsequently define a new root port
                 local["lowest"] = neighbor_name
                 local[local[neighbor_name[2]]] = "RP" 
-
+"""
 # complete the directly connected machines with paths leading through not directly connected devices, for the sake of designated ports
 for localised in directly_connected_dict:
     local = directly_connected_dict[localised] # get a dictionary with a useful name to reflect local switches
@@ -234,3 +373,4 @@ for switch_name in stp_domain:
 
 # Provide an output file
 utils.provideOutfile(stp_domain, "test123")
+#"""
