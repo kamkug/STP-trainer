@@ -55,9 +55,6 @@ class STPUtils():
         except FileNotFoundError:
             print("[-] The directory you are trying to use does not exist")
     
-    def up_n(self, path, n):
-        components = os.path.normpath(path).split(os.sep)
-        return os.sep.join(components[:-n])
 
     def verifyInput(self):
         """
