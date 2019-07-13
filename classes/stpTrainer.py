@@ -286,7 +286,18 @@ class STPTrainer():
             print(f"[info] {switch_name}'s bridge ID is: {switch_bridge_ID}")
         else:
             return switch_bridge_ID
- 
+    
+    def getSwitchLinkToNeighborCost(self, stp_domain, local_name, neighbor_name, human_readable=True):
+        """
+        Function returns a cost of the link along with the name of the neighboring switch
+        
+        """
+        local_to_neighbor_link_cost = stp_domain[local_name][neighbor_name][0]
+        if human_readable:
+            print(f"[info] {local_name}'s link cost to {neighbor_name} equals: {local_to_neighbor_link_cost}")
+        else:
+            return (local_to_neighbor_link_cost, neighbor_name)
+        
     def getSwitchPortRoles(self, stp_domain):
         """
         Function returns a list of lists for:
