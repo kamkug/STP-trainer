@@ -276,20 +276,7 @@ class STPTrainer():
                         switch[key][2] = "BP"
         
     # Getters
-    def getSwitchRP(self, stp_domain, switch_name):
-        """
-        Function if successfull returns a tuple in the form:
-        (next_hop_device_to_the_root_port, egress_port_ID)
-        else returns None
-        """
-        switch_in_question = stp_domain[switch_name]
-        if switch_in_question["role"] != "root":
-            for key in switch_in_question.keys():
-                if key == switch_in_question["lowest"]:
-                    return (switch_in_question[key][4], switch_in_question["lowest"])
-        else:
-            
-            return None
+ 
     def getSwitchPortRoles(self, stp_domain):
         """
         Function returns a list of lists for:
@@ -314,9 +301,37 @@ class STPTrainer():
                         port_roles[2].append(( switch_in_question[4], switch_name ))
         return port_roles
 
-
-
+    def getSwitchRootPort(self, stp_domain, switch_name, human_readable=True):
+        """
+        Function if successfull returns a tuple in the form:
+        (next_hop_device_to_the_root_port, egress_port_ID)
+        else returns None
+        """
+        switch_in_question = stp_domain[switch_name]
+        next_hop_switch = switch_in_question["lowest"]
+        root_port_ID = switch_in_question[next_hop_switch][4]
+        cost = switch_in_question[next_hop_switch][1]
+        
+        if switch_in_question["role"] != "root":
+            if human_readable:
+                print(f"[info] {switch_name}'s link to {next_hop_switch} is the best root path")
+                print(f"[info] {switch_name} best root path cost equals: {cost}")
+            else:
+                return (( switch_in_question[root_port_ID], next_hop_switch ))
+   
 """
+Example of a template for creation of a switch with ports to other devices
+"s1": {
+        "bridgeID": 40961,
+        "s2" : [64, 0, "none", 128, 3],
+        "s3" : [4, 0, "none", 128, 1],
+        "lowest" : "",
+        "name": "s1",
+        "role": "none"
+
+    },
+
+
 # verify that Ctrl-D has not been issued
 try:
     utils = STPUtils()
