@@ -31,7 +31,7 @@ class STPTrainer():
         self.calculateCostsForNonRootPorts()
         self.setDesignatedPorts()   
         self.setBlockingPorts()
-        self.display()
+        #self.display()
 
     def display(self):
         """
@@ -55,7 +55,7 @@ class STPTrainer():
                     blocking_ports.append(str(switch[key][4]))
             print("Blocking ports: ", ', '.join(blocking_ports) if blocking_ports else "None")
             print(40 * '-')
-
+        print(self.stp_domain)             
 
     def calculateCostThroughNeighbor(self, directly_connected_dict, neighbor_name, local):
         """
@@ -273,9 +273,41 @@ class STPTrainer():
             switch = self.stp_domain[switch_name]
             for key in switch.keys():
                 if key.startswith('s'):
-                    if switch[key][2] == "none":
-                        switch[key][2] == "BP"
-        #return self.stp_domain
+                    if switch[key][2] == 'none':
+                        switch[key][2] = "BP"
+        
+    # Getters
+    def getSwitchRP(self, stp_domain, switch_name):
+        """
+        Function if successfull returns a tuple in the form:
+        (next_hop_device_to_the_root_port, egress_port_ID)
+        else returns None
+        """
+        switch_in_question = stp_domain[switch_name]
+        if switch_in_question["role"] != "root":
+            for key in switch_in_question.keys():
+                if key == switch_in_question["lowest"]:
+                    return (switch_in_question[key][4], switch_in_question["lowest"])
+        else:
+            
+            return None
+    def getSwitchPortRoles(self, stp_domain):
+        bp = []
+        dp = []
+        rp = []
+        port_roles = [bp, dp, rp]
+        for switch_name in stp_domain:
+            switch = stp_domain[switch_name]
+            for key in switch.keys():
+                if key.startswith('s'):
+                    switch_in_question = switch[key]
+                    print(switch[key][2])
+                    if switch[key][2] == "BP":
+                        port_roles[0].append((switch_in_question[3], switch_in_question[4]))
+        return port_roles
+
+
+
 """
 # verify that Ctrl-D has not been issued
 try:
