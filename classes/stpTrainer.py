@@ -281,37 +281,49 @@ class STPTrainer():
         """
         Function returns a bridge ID of the provided switch
         """
-        switch_bridge_ID =  stp_domain[switch_name]["bridgeID"]
-        if human_readable:
-            print(f"[info] {switch_name}'s bridge ID is: {switch_bridge_ID}")
-        else:
-            return switch_bridge_ID
-    
+        try:
+            switch_bridge_ID =  stp_domain[switch_name]["bridgeID"]
+            if human_readable:
+                print(f"[info] Switch {switch_name}'s bridge ID is: {switch_bridge_ID}")
+            else:
+                return switch_bridge_ID
+        except KeyError:
+            print("[-] This switch is not a part of this stp domain")
+
+ 
     def getSwitchLinkToNeighborCost(self, stp_domain, local_name, neighbor_name, human_readable=True):
         """
         Function returns a cost of the link along with the name of the neighboring switch
         
         """
-        local_to_neighbor_link_cost = stp_domain[local_name][neighbor_name][0]
-        if human_readable:
-            print(f"[info] {local_name}'s link cost to {neighbor_name} equals: {local_to_neighbor_link_cost}")
-        else:
-            return (local_to_neighbor_link_cost, neighbor_name)
-    
+        try:
+            local_to_neighbor_link_cost = stp_domain[local_name][neighbor_name][0]
+            if human_readable:
+                print(f"[info] Switch {local_name}'s link cost to {neighbor_name} equals: {local_to_neighbor_link_cost}")
+            else:
+                return (local_to_neighbor_link_cost, neighbor_name)
+        except KeyError:
+            print("[-] This switch is not a part of this stp domain")
+
+
     def getSwitchPortPriorityAndID(self, stp_domain, local_name, interface_name, human_readable=True):
         """
         Function returns a Port Priority and Port ID for a given interface
         on a provided switch
         """
-        interface = stp_domain[local_name][interface_name] 
-        port_priority = interface[3]
-        port_ID = interface[4]
-        if human_readable:
-            print(f"[info] {local_name}'s priority is: {port_priority}")
-            print(f"[info] {local_name}'s port ID is: {port_ID}")
-        else :
-            return (( port_priority, port_ID, interface_name ))
-    
+        try:
+                interface = stp_domain[local_name][interface_name] 
+                port_priority = interface[3]
+                port_ID = interface[4]
+                if human_readable:
+                    print(f"[info] Port {local_name}'s priority is: {port_priority}")
+                    print(f"[info] Port {local_name}'s ID is: {port_ID}")
+                else :
+                    return ( port_priority, port_ID, interface_name )
+        except KeyError:
+            print("[-] This switch is not a part of this stp domain")
+
+
     def getSwitchPortRoles(self, stp_domain):
         """
         Function returns a list of lists for:
@@ -340,11 +352,14 @@ class STPTrainer():
         """
         Function returns a general switch role either root or non-root
         """
-        switch_role = stp_domain[switch_name]["role"]
-        if human_readable:
-            print(f"[info] {switch_name } is a {switch_role}")
-        else:
-            return switch_role
+        try:
+            switch_role = stp_domain[switch_name]["role"]
+            if human_readable:
+                print(f"[info] Switch {switch_name } is a {switch_role}")
+            else:
+                return switch_role
+        except KeyError:
+            print("[-] This switch is not a part of this stp domain")
 
     def getSwitchRootPort(self, stp_domain, switch_name, human_readable=True):
         """
@@ -352,20 +367,26 @@ class STPTrainer():
         (next_hop_device_to_the_root_port, egress_port_ID)
         else returns None
         """
-        switch_in_question = stp_domain[switch_name]
-        if switch_in_question["role"] != "root":
-            best_next_hop_switch = switch_in_question["lowest"]
-            root_port_ID = switch_in_question[best_next_hop_switch][4]
-            cost = switch_in_question[best_next_hop_switch][1]
-            
-            if human_readable:
-                print(f"[info] {switch_name}'s link to {best_next_hop_switch} is the best root path")
-                print(f"[info] {switch_name}'s best root path cost equals: {cost}")
+        try:
+            switch_in_question = stp_domain[switch_name]
+            if switch_in_question["role"] != "root":
+                best_next_hop_switch = switch_in_question["lowest"]
+                root_port_ID = switch_in_question[best_next_hop_switch][4]
+                cost = switch_in_question[best_next_hop_switch][1]
+                
+                if human_readable:
+                    print(f"[info] Switch {switch_name}'s link to {best_next_hop_switch} is the best root path")
+                    print(f"[info] Switch {switch_name}'s best root path cost equals: {cost}")
+                else:
+                    return ( root_port_ID, best_next_hop_switch )
             else:
-                return (( root_port_ID, best_next_hop_switch ))
-        else:
-            print("[-] This is a root bridge")
-   
+                print("[-] This is a root bridge")
+
+        except KeyError:
+            print("[-] This switch is not a part of this stp domain")
+
+
+            
 """
 Example of a template for creation of a switch with ports to other devices
 "s1": {
