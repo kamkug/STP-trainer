@@ -2,10 +2,13 @@ import sys
 import signal
 import json
 import os
+import logging
+
+logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 class STPUtils():
     def __init__(self):
-        print("[+] The STPUtils successfully loaded")
+        logging.info("[+] The STPUtils successfully loaded")
         # start listening for a SIGINT
         signal.signal(signal.SIGINT, self.keyboardInterruptHandler)
     
@@ -19,23 +22,23 @@ class STPUtils():
         try:
             ifile = os.path.join("stp_domains", f"{filename}.json")
             with open(ifile, "r") as infile:
-                print("\n[+] Input file was successfully loaded")
+                logging.info("\n[+] Input file was successfully loaded")
                 return json.load(infile)
         except FileNotFoundError:
             try: 
                 filename = filename.split('.')[1]
                 if filename == 'json':
-                    print("\n[-] Try providing a file name without a .json")
+                    logging.info("\n[-] Try providing a file name without a .json")
                     exit(1)
             except IndexError:
-                 print( "\n[-] Provided file does not exist inside of stp_domains directory")
+                 logging.info( "\n[-] Provided file does not exist inside of stp_domains directory")
                  exit(2)
 
     def keyboardInterruptHandler(self, signal, frame):
         """
         This function gratiously handles a SIGINT (Ctrl-C)
         """
-        print(f"\n[Ctrl-C] Shutting down ...")
+        logging.warning(f"\n[Ctrl-C] Shutting down ...")
         exit(0)
     
     def provideOutfile(self, results, ofileName):
@@ -47,9 +50,9 @@ class STPUtils():
             filename = os.path.join("results", f"{ofileName}.json")
             with open(filename, "w") as outfile:
                 json.dump(results, outfile)
-                print("[+] File was successfully created")
+                logging.info("[+] File was successfully created")
         except FileNotFoundError:
-            print("[-] The directory you are trying to use does not exist")
+            logging.info("[-] The directory you are trying to use does not exist")
     
 
     def verifyInput(self):
@@ -63,7 +66,7 @@ class STPUtils():
             infile =  sys.argv[1]
             outfile = sys.argv[2]
         except IndexError:
-            print("[-] usage: ./run.py [infile] [outfile]")
+            logging.info("[-] usage: ./run.py [infile] [outfile]")
             if not infile:
                 infile = input("\nPlease provide a name of the input file: ")
             if not outfile:
