@@ -17,7 +17,7 @@ class STPUtils():
         """
         filename = self.verifyInput()
         try:
-               
+            os.path.dirname("STP-802.1D")   
             ifile = os.path.join("stp_domains", f"{filename}.json")
             with open(ifile, "r") as infile:
                 print("\n[+] Input file was successfully loaded")
