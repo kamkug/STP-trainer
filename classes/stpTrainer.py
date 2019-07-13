@@ -31,7 +31,7 @@ class STPTrainer():
         self.calculateCostsForNonRootPorts()
         self.setDesignatedPorts()   
         self.setBlockingPorts()
-        #self.display()
+        self.display()
 
     def display(self):
         """
@@ -55,7 +55,6 @@ class STPTrainer():
                     blocking_ports.append(str(switch[key][4]))
             print("Blocking ports: ", ', '.join(blocking_ports) if blocking_ports else "None")
             print(40 * '-')
-        print(self.stp_domain)             
 
     def calculateCostThroughNeighbor(self, directly_connected_dict, neighbor_name, local):
         """
@@ -292,6 +291,12 @@ class STPTrainer():
             
             return None
     def getSwitchPortRoles(self, stp_domain):
+        """
+        Function returns a list of lists for:
+        blocking ports, designated ports and root ports
+        in a following tuple format:
+        ( port_id_of_a_root, switch_this_port_belongs_to)
+        """
         bp = []
         dp = []
         rp = []
@@ -301,9 +306,12 @@ class STPTrainer():
             for key in switch.keys():
                 if key.startswith('s'):
                     switch_in_question = switch[key]
-                    print(switch[key][2])
                     if switch[key][2] == "BP":
-                        port_roles[0].append((switch_in_question[3], switch_in_question[4]))
+                        port_roles[0].append(( switch_in_question[4], switch_name ))
+                    elif switch[key][2] == "DP":
+                        port_roles[1].append(( switch_in_question[4], switch_name ))
+                    else :
+                        port_roles[2].append(( switch_in_question[4], switch_name ))
         return port_roles
 
 

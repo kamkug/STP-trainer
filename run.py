@@ -9,7 +9,8 @@ try:
     utils = STPUtils()
     stp_domain = utils.getInfile(sys.argv)
     stpDomain = STPTrainer(stp_domain)
-    utils.provideOutfile(stpDomain.stp_domain, "test123")
+    #print(stpDomain.getSwitchPortRoles(stp_domain))
+    #utils.provideOutfile(stpDomain.stp_domain, "test123")
 except  EOFError:
     print("\n[Ctrl-D] Shutting down...")
     exit(1)
