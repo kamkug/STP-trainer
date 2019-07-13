@@ -15,6 +15,7 @@ try:
     #print(stpDomain.getSwitchBridgeID(stp_domain, 's2', human_readable=False))
     #print(stpDomain.getSwitchPortPriorityAndID(stp_domain, 's2', 's3', human_readable=False))
     #print(stpDomain.getSwitchLinkToNeighborCost(stp_domain, 's2', 's3', human_readable=False))
+    print(stpDomain.getSwitchRole(stp_domain, 's8', human_readable=False))
     utils.provideOutfile(stpDomain.stp_domain, outfile)
 except  EOFError:
     print("\n[Ctrl-D] Shutting down...")

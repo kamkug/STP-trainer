@@ -336,6 +336,16 @@ class STPTrainer():
                         port_roles[2].append(( switch_in_question[4], switch_name ))
         return port_roles
 
+    def getSwitchRole(self, stp_domain, switch_name, human_readable=True):
+        """
+        Function returns a general switch role either root or non-root
+        """
+        switch_role = stp_domain[switch_name]["role"]
+        if human_readable:
+            print(f"[info] {switch_name } is a {switch_role}")
+        else:
+            return switch_role
+
     def getSwitchRootPort(self, stp_domain, switch_name, human_readable=True):
         """
         Function if successfull returns a tuple in the form:
