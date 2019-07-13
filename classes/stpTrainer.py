@@ -297,7 +297,21 @@ class STPTrainer():
             print(f"[info] {local_name}'s link cost to {neighbor_name} equals: {local_to_neighbor_link_cost}")
         else:
             return (local_to_neighbor_link_cost, neighbor_name)
-        
+    
+    def getSwitchPortPriorityAndID(self, stp_domain, local_name, interface_name, human_readable=True):
+        """
+        Function returns a Port Priority and Port ID for a given interface
+        on a provided switch
+        """
+        interface = stp_domain[local_name][interface_name] 
+        port_priority = interface[3]
+        port_ID = interface[4]
+        if human_readable:
+            print(f"[info] {local_name}'s priority is: {port_priority}")
+            print(f"[info] {local_name}'s port ID is: {port_ID}")
+        else :
+            return (( port_priority, port_ID, interface_name ))
+    
     def getSwitchPortRoles(self, stp_domain):
         """
         Function returns a list of lists for:
