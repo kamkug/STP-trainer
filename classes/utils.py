@@ -17,7 +17,8 @@ class STPUtils():
         """
         filename = self.verifyInput()
         try:
-               
+
+            os.path.dirname("STP-802.1D")   
             ifile = os.path.join("stp_domains", f"{filename}.json")
             with open(ifile, "r") as infile:
                 print("\n[+] Input file was successfully loaded")
@@ -31,6 +32,7 @@ class STPUtils():
             except IndexError:
                  print( "\n[-] Provided file does not exist inside of stp_domains directory")
                  exit(2)
+
     def keyboardInterruptHandler(self, signal, frame):
         """
         This function gratiously handles a SIGINT (Ctrl-C)
