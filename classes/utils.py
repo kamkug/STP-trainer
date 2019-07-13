@@ -15,10 +15,8 @@ class STPUtils():
         derived from a provided json file.
         The data is presented in a dictionary format
         """
-        filename = self.verifyInput()
+        #filename = self.verifyInput()
         try:
-
-            os.path.dirname("STP-802.1D")   
             ifile = os.path.join("stp_domains", f"{filename}.json")
             with open(ifile, "r") as infile:
                 print("\n[+] Input file was successfully loaded")
@@ -59,12 +57,17 @@ class STPUtils():
         Functions ensure that user will provide some input
         and than returns this input.
         """
-        filename= ''
+        infile = ''
+        outfile = ''
         try: 
-            filename =  sys.argv[1]
+            infile =  sys.argv[1]
+            outfile = sys.argv[2]
         except IndexError:
-            while not filename:
-                filename = input("\nPlease provide a name of the file: ")
-        return filename
+            print("[-] usage: ./run.py [infile] [outfile]")
+            if not infile:
+                infile = input("\nPlease provide a name of the input file: ")
+            if not outfile:
+                outfile = input("\nPlease provide a name of the output file: ")
+        return infile, outfile
 
        
