@@ -276,6 +276,16 @@ class STPTrainer():
                         switch[key][2] = "BP"
         
     # Getters
+    
+    def getSwitchBridgeID(self, stp_domain, switch_name, human_readable=True):
+        """
+        Function returns a bridge ID of the provided switch
+        """
+        switch_bridge_ID =  stp_domain[switch_name]["bridgeID"]
+        if human_readable:
+            print(f"[info] {switch_name}'s bridge ID is: {switch_bridge_ID}")
+        else:
+            return switch_bridge_ID
  
     def getSwitchPortRoles(self, stp_domain):
         """
@@ -308,16 +318,18 @@ class STPTrainer():
         else returns None
         """
         switch_in_question = stp_domain[switch_name]
-        next_hop_switch = switch_in_question["lowest"]
-        root_port_ID = switch_in_question[next_hop_switch][4]
-        cost = switch_in_question[next_hop_switch][1]
-        
         if switch_in_question["role"] != "root":
+            best_next_hop_switch = switch_in_question["lowest"]
+            root_port_ID = switch_in_question[best_next_hop_switch][4]
+            cost = switch_in_question[best_next_hop_switch][1]
+            
             if human_readable:
-                print(f"[info] {switch_name}'s link to {next_hop_switch} is the best root path")
-                print(f"[info] {switch_name} best root path cost equals: {cost}")
+                print(f"[info] {switch_name}'s link to {best_next_hop_switch} is the best root path")
+                print(f"[info] {switch_name}'s best root path cost equals: {cost}")
             else:
-                return (( switch_in_question[root_port_ID], next_hop_switch ))
+                return (( root_port_ID, best_next_hop_switch ))
+        else:
+            print("[-] This is a root bridge")
    
 """
 Example of a template for creation of a switch with ports to other devices
