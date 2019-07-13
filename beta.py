@@ -26,11 +26,6 @@ except  EOFError:
 counter = 65536255
 root_bridge = ''
 
-# find a root bridge
-for switch in stp_domain:
-    if stp_domain[switch]["bridgeID"] < counter:
-        root_bridge = switch
-        counter = stp_domain[switch]["bridgeID"]
 
 print(root_bridge)
 def setRootBridge(stp_domain):
@@ -82,10 +77,16 @@ def defineSwitchType(stp_domain):
     return directly_connected, not_directly_connected, stp_domain
 
 def setDictionaryOfSwitches(switches_list):
-    # creating a dictionary of directly connected devices
+    """
+    Function creates a dictionary out of a list
+    """
     return  { switches_list[index]:stp_domain[switches_list[index]] for index in range (len(switches_list))}
 
 def calculateCostThroughNeighbor(neighbor_name, local, root_bridge):
+    """
+    Function calculates minimum cost through neighbor and compares
+    that value with local lowest root path cost
+    """
     lowest_current_local_root_path_cost = local[local["lowest"]][1]
     link_to_neighbor_cost = local[neighbor_name][0] 
     neighbor_root_path_cost = directly_connected_dict[neighbor_name][root_bridge][1] 
@@ -95,6 +96,9 @@ def calculateCostThroughNeighbor(neighbor_name, local, root_bridge):
                 
         
 def setRootPathCostForDirectlyConnected(switches_dict, switches_list, root_bridge):
+    """
+    Function identifies root ports for directly connected switches
+    """
     for local_name in switches_dict:
         for neighbor_name in switches_list:
             local = switches_dict[local_name] 
@@ -107,6 +111,10 @@ def setRootPathCostForDirectlyConnected(switches_dict, switches_list, root_bridg
     return switches_dict
 
 def setNewRootPort(local, neighbor_name, reset=True):
+    """
+    Function deals with assigning a RP role after resetting of
+    previous lowest port role to none
+    """
     if reset:
         local[local["lowest"]][2] = "none"    # reset the root port if necessary
     local["lowest"] = neighbor_name           # name the lowest switch appropriately
@@ -136,7 +144,9 @@ def setRootPathCostForNotDirectlyConnected(not_directly_connected_dict, directly
     return not_directly_connected, stp_domain
  
 def verifyCostBetweenNotDirectlyConnectedDevices(not_directly_connected_dict):
-
+    """
+    Function defines root path costs between not directly connected devices
+    """
     for local_name in not_directly_connected_dict:
         local = not_directly_connected_dict[local_name]  # get a local machine information
         for neighbor_name in not_directly_connected_dict:
@@ -181,6 +191,10 @@ def calculateCostsForNonRootPorts(directly_connected_dict, not_directly_connecte
     return stp_domain
 
 def setDesignatedPorts(root_bridge, stp_domain):
+    """
+    Function establishes DPs for all of the switches from the stp domain
+    then subsequently ensures that all root bridge ports are set to be DPs as well
+    """
     for switch_name in stp_domain:
         if switch_name is not root_bridge:  # mainly look at non-root switches, neighbor of a root can not have a designated port facing the root bridge
             local = stp_domain[switch_name] # define a local switch dictionary for simplicity
@@ -207,7 +221,9 @@ def setDesignatedPorts(root_bridge, stp_domain):
     return stp_domain
 
 def setBlockingPorts(stp_domain):
-    type(stp_domain)
+    """
+    Function ensure that all remaining ("none") ports are set to be BPs
+    """
     for switch_name in stp_domain:
         switch = stp_domain[switch_name]
         for key in switch.keys():
@@ -218,6 +234,9 @@ def setBlockingPorts(stp_domain):
 
 
 def display(stp_domain):
+    """
+    Function displays the results in a human readable format
+    """
     for switch_name in stp_domain:
         designated_ports = []
         blocking_ports = []
@@ -237,6 +256,7 @@ def display(stp_domain):
         print("Blocking ports: ", ', '.join(blocking_ports) if blocking_ports else "None")
         print(40 * '-')
 
+# main program starts here
 root_bridge = setRootBridge(stp_domain)
 stp_domain = setRoles(root_bridge, stp_domain)
 directly_connected, not_directly_connected, stp_domain = defineSwitchType(stp_domain)
