@@ -21,9 +21,10 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 ### ------------------------------------CLASS-----------------------------------------
 class STPTrainer():
-    def __init__(self, stp_domain, test=False):
+    def __init__(self, stp_domain, verbosity):
         self.counter = 655362555 # setting the counter to the highest possible value
         self.stp_domain = stp_domain
+        self.verbosity = verbosity
         # define who is a root bridge
         self.root_bridge = self.setRootBridge()
         # set general roles for the switches root|non-root
@@ -36,7 +37,7 @@ class STPTrainer():
         self.calculateCostsForNonRootPorts()
         self.setDesignatedPorts()   
         self.setBlockingPorts()
-        if test:
+        if not self.verbosity:
             self.port_roles = self.getSwitchPortRoles(self.stp_domain)
         else:
             self.display()

@@ -10,9 +10,12 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 # verify that Ctrl-D has not been issued
 try:
     utils = STPUtils()
-    infile, outfile = utils.verifyInput()
+    infile, outfile, verbosity = utils.getCommandLineArguments()
+    #infile = options.infile
+    #outfile = options.outfile
+    #infile, outfile = utils.verifyInput()
     stp_domain = utils.getInfile(infile)
-    stpDomain = STPTrainer(stp_domain)
+    stpDomain = STPTrainer(stp_domain, verbosity)
     #stpDomain.getSwitchPortRoles(stp_domain))
     #stpDomain.getSwitchRootPort(stp_domain, 's2', human_readable=True))
     #stpDomain.getSwitchBridgeID(stp_domain, 's2', human_readable=True))

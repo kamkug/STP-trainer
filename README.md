@@ -1,4 +1,4 @@
-# Early (working) version of my STP trainer program
+# STP trainer program
 
 Author: Kamil Kugler
 
