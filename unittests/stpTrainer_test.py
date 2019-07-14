@@ -38,9 +38,9 @@ class STPTrainerTest(TestCase):
         for domain in domains:
             stp_domain = STPUtils.getInfile(self, domain, True)
             self.stp_domains[domain] = STPTrainer(stp_domain, True).port_roles
-        return self.stp_domains     
+        #return self.stp_domains     
 
-    def testSTPTrainer(self, stp_domains):
+    def testSTPTrainer(self):
         """
         Function is comparing the results of STPTrainer class against the actual correct cases results
         """
@@ -89,8 +89,8 @@ class STPTrainerTest(TestCase):
                     ]
 
         counter = 0
-        for stp_domain in stp_domains:
-            STPTrainerResult = stp_domains[stp_domain]
+        for stp_domain in self.stp_domains:
+            STPTrainerResult = self.stp_domains[stp_domain]
             self.assertEqual(STPTrainerResult, test_against_those_cases[counter])
             counter += 1
                                 
