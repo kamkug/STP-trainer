@@ -16,9 +16,11 @@ class STPTrainerTest(TestCase):
     """
     Class defines a test case suite for the STPTrainer class
     """
+    
     def setUp(self):
         """
-        Function creates a dictionary of results that provides the following output:
+        Function creates a dictionary of results for STPTrainer runs on given domain names.
+        The result is given in the following format:
         { 
             "domain_name" : [
                                 [ (blocking_port_name, blocking_port_id), ... ],
