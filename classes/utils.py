@@ -1,6 +1,7 @@
 import sys
 import signal
 import json
+import argparse
 import os
 import logging
 
@@ -58,8 +59,24 @@ class STPUtils():
         except FileNotFoundError:
             logging.info("[-] The directory you are trying to use does not exist")
     
-
-    def verifyInput(self):
+    def getCommandLineArguments(self):
+        """
+        Function will get command line arguments  and if they are not provides 
+        it will alert the user
+        """
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-i", "--infile", dest="infile", type=str, help="the input file")
+        parser.add_argument("-o", "--outfile", dest="outfile", type=str, help="the output file")
+        parser.add_argument("-v", "--verbosity", action="store_true", dest="verbosity")
+        args = parser.parse_args()
+        
+        if args.infile != None: #or args.outfile != None:
+            print(args)
+            return args.infile, args.outfile, args.verbosity
+        else:
+            return self.verifyInput(args.verbosity)
+            
+    def verifyInput(self, verbosity):
         """
         Functions ensure that user will provide some input
         and than returns this input.
@@ -78,6 +95,6 @@ class STPUtils():
             if infile == '' and outfile == '':
                 logging.info("\n[-] usage: ./run.py [infile] [outfile]")
                 exit(2)
-        return infile, outfile
+        return infile, outfile, verbosity
 
        
