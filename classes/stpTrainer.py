@@ -2,6 +2,11 @@
 
 from classes.utils import STPUtils
 import sys
+import logging
+
+logging.basicConfig(format='%(message)s', level=logging.INFO)
+
+
 # define an example self.stp_domain to work with
 
 # each link is described by the use of a following pattern :
@@ -16,7 +21,7 @@ import sys
 
 ### ------------------------------------CLASS-----------------------------------------
 class STPTrainer():
-    def __init__(self, stp_domain):
+    def __init__(self, stp_domain, test=False):
         self.counter = 655362555 # setting the counter to the highest possible value
         self.stp_domain = stp_domain
         # define who is a root bridge
@@ -31,8 +36,11 @@ class STPTrainer():
         self.calculateCostsForNonRootPorts()
         self.setDesignatedPorts()   
         self.setBlockingPorts()
-        #self.display()
-
+        if test:
+            self.port_roles = self.getSwitchPortRoles(self.stp_domain)
+        else:
+            self.display()
+    
     def display(self):
         """
         Function displays the results in a human readable format
@@ -41,21 +49,20 @@ class STPTrainer():
             designated_ports = []
             blocking_ports = []
             switch = self.stp_domain[switch_name]
-            print("The ", switch["name"], " info:")
-            print("Bridge role: ",  switch["role"])
-            print("Bridge ID: ", switch["bridgeID"])
+            logging.info(f"The {switch['name']}  info:")
+            logging.info(f"Bridge role: {switch['role']}")
+            logging.info(f"Bridge ID:  {switch['bridgeID']}")
             if switch["role"] != "root":   # no need to look for a root port on a root bridge
-                print("Root port: ", switch[switch["lowest"]][4])
+                logging.info(f"Root port: {switch[switch['lowest']][4]}")
             for key in switch.keys():   # make sure that there are any designated ports
                 if key.startswith('s') and switch[key][2] == "DP":
                     designated_ports.append(str(switch[key][4]))
-            print("Designated ports: ", ', '.join(designated_ports) if designated_ports else "None")
+            logging.info(f"Designated ports: {', '.join(designated_ports) if designated_ports else 'None'}")
             for key in switch.keys():   # make sure that there are any blocking ports
                 if key.startswith('s') and switch[key][2] == "BP":
                     blocking_ports.append(str(switch[key][4]))
-            print("Blocking ports: ", ', '.join(blocking_ports) if blocking_ports else "None")
-            print(40 * '-')
-        print(self.stp_domain)             
+            logging.info(f"Blocking ports: {', '.join(blocking_ports) if blocking_ports else 'None'}")
+            logging.info(40 * '-')
 
     def calculateCostThroughNeighbor(self, directly_connected_dict, neighbor_name, local):
         """
@@ -86,7 +93,7 @@ class STPTrainer():
                 directly_connected.append(switch)
             elif switch != self.root_bridge:
                 not_directly_connected.append(switch)  
-        return directly_connected, not_directly_connected#, self.stp_domain
+        return directly_connected, not_directly_connected
 
     def setDictionaryOfSwitches(self, switches_list):
         """
@@ -277,21 +284,61 @@ class STPTrainer():
                         switch[key][2] = "BP"
         
     # Getters
-    def getSwitchRP(self, stp_domain, switch_name):
+    
+    def getSwitchBridgeID(self, stp_domain, switch_name, human_readable=True):
         """
-        Function if successfull returns a tuple in the form:
-        (next_hop_device_to_the_root_port, egress_port_ID)
-        else returns None
+        Function returns a bridge ID of the provided switch
         """
-        switch_in_question = stp_domain[switch_name]
-        if switch_in_question["role"] != "root":
-            for key in switch_in_question.keys():
-                if key == switch_in_question["lowest"]:
-                    return (switch_in_question[key][4], switch_in_question["lowest"])
-        else:
-            
-            return None
+        try:
+            switch_bridge_ID =  stp_domain[switch_name]["bridgeID"]
+            if human_readable:
+                logging.info(f"[info] Switch {switch_name}'s bridge ID is: {switch_bridge_ID}")
+            else:
+                return switch_bridge_ID
+        except KeyError:
+            logging.info("[-] This switch is not a part of this stp domain")
+
+ 
+    def getSwitchLinkToNeighborCost(self, stp_domain, local_name, neighbor_name, human_readable=True):
+        """
+        Function returns a cost of the link along with the name of the neighboring switch
+        
+        """
+        try:
+            local_to_neighbor_link_cost = stp_domain[local_name][neighbor_name][0]
+            if human_readable:
+                logging.info(f"[info] Switch {local_name}'s link cost to {neighbor_name} equals: {local_to_neighbor_link_cost}")
+            else:
+                return (local_to_neighbor_link_cost, neighbor_name)
+        except KeyError:
+            logging.info("[-] This switch is not a part of this stp domain")
+
+
+    def getSwitchPortPriorityAndID(self, stp_domain, local_name, interface_name, human_readable=True):
+        """
+        Function returns a Port Priority and Port ID for a given interface
+        on a provided switch
+        """
+        try:
+                interface = stp_domain[local_name][interface_name] 
+                port_priority = interface[3]
+                port_ID = interface[4]
+                if human_readable:
+                    logging.info(f"[info] Port {local_name}'s priority is: {port_priority}")
+                    logging.info(f"[info] Port {local_name}'s ID is: {port_ID}")
+                else :
+                    return ( port_priority, port_ID, interface_name )
+        except KeyError:
+            logging.info("[-] This switch is not a part of this stp domain")
+
+
     def getSwitchPortRoles(self, stp_domain):
+        """
+        Function returns a list of lists for:
+        blocking ports, designated ports and root ports
+        in a following tuple format:
+        ( port_id_of_a_root, switch_this_port_belongs_to)
+        """
         bp = []
         dp = []
         rp = []
@@ -301,14 +348,66 @@ class STPTrainer():
             for key in switch.keys():
                 if key.startswith('s'):
                     switch_in_question = switch[key]
-                    print(switch[key][2])
                     if switch[key][2] == "BP":
-                        port_roles[0].append((switch_in_question[3], switch_in_question[4]))
+                        port_roles[0].append(( switch_in_question[4], switch_name ))
+                    elif switch[key][2] == "DP":
+                        port_roles[1].append(( switch_in_question[4], switch_name ))
+                    else :
+                        port_roles[2].append(( switch_in_question[4], switch_name ))
         return port_roles
 
+    def getSwitchRole(self, stp_domain, switch_name, human_readable=True):
+        """
+        Function returns a general switch role either root or non-root
+        """
+        try:
+            switch_role = stp_domain[switch_name]["role"]
+            if human_readable:
+                logging.info(f"[info] Switch {switch_name } is a {switch_role}")
+            else:
+                return switch_role
+        except KeyError:
+            logging.info("[-] This switch is not a part of this stp domain")
+
+    def getSwitchRootPort(self, stp_domain, switch_name, human_readable=True):
+        """
+        Function if successfull returns a tuple in the form:
+        (next_hop_device_to_the_root_port, egress_port_ID)
+        else returns None
+        """
+        try:
+            switch_in_question = stp_domain[switch_name]
+            if switch_in_question["role"] != "root":
+                best_next_hop_switch = switch_in_question["lowest"]
+                root_port_ID = switch_in_question[best_next_hop_switch][4]
+                cost = switch_in_question[best_next_hop_switch][1]
+                
+                if human_readable:
+                    logging.info(f"[info] Switch {switch_name}'s link to {best_next_hop_switch} is the best root path")
+                    logging.info(f"[info] Switch {switch_name}'s best root path cost equals: {cost}")
+                else:
+                    return ( root_port_ID, best_next_hop_switch )
+            else:
+                logging.info("[-] This is a root bridge")
+
+        except KeyError:
+            logging.info("[-] This switch is not a part of this stp domain")
 
 
+            
 """
+Example of a template for creation of a switch with ports to other devices
+"s1": {
+        "bridgeID": 40961,
+        "s2" : [64, 0, "none", 128, 3],
+        "s3" : [4, 0, "none", 128, 1],
+        "lowest" : "",
+        "name": "s1",
+        "role": "none"
+
+    },
+
+
 # verify that Ctrl-D has not been issued
 try:
     utils = STPUtils()
@@ -317,7 +416,7 @@ try:
     # Provide an output file
     utils.provideOutfile(stpD.self.stp_domain, "test123")
 except  EOFError:
-    print("\n[Ctrl-D] Shutting down...")
+    logging.info("\n[Ctrl-D] Shutting down...")
     exit(1)
 """
 

@@ -1,0 +1,3 @@
+# Ignoring some python extra files
+__pycache__/
+*.pyc
