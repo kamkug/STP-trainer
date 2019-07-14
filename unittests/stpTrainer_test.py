@@ -37,7 +37,7 @@ class STPTrainerTest(TestCase):
         self.stp_domains = {}
         for domain in domains:
             stp_domain = STPUtils.getInfile(self, domain, True)
-            self.stp_domains[domain] = STPTrainer(stp_domain, True).port_roles
+            self.stp_domains[domain] = STPTrainer(stp_domain, False).port_roles
         #return self.stp_domains     
 
     def testSTPTrainer(self):
