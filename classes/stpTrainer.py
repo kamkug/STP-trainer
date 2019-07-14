@@ -21,7 +21,7 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 ### ------------------------------------CLASS-----------------------------------------
 class STPTrainer():
-    def __init__(self, stp_domain):
+    def __init__(self, stp_domain, test=False):
         self.counter = 655362555 # setting the counter to the highest possible value
         self.stp_domain = stp_domain
         # define who is a root bridge
@@ -36,8 +36,11 @@ class STPTrainer():
         self.calculateCostsForNonRootPorts()
         self.setDesignatedPorts()   
         self.setBlockingPorts()
-        self.display()
-
+        if test:
+            self.port_roles = self.getSwitchPortRoles(self.stp_domain)
+        else:
+            self.display()
+    
     def display(self):
         """
         Function displays the results in a human readable format

@@ -8,21 +8,21 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 class STPUtils():
     def __init__(self):
-        logging.info("[+] The STPUtils successfully loaded")
+        #logging.info("[+] The STPUtils successfully loaded")
         # start listening for a SIGINT
         signal.signal(signal.SIGINT, self.keyboardInterruptHandler)
     
-    def getInfile(self, filename):
+    def getInfile(self, filename, test=False):
         """
         Function does return a stp_domain
         derived from a provided json file.
         The data is presented in a dictionary format
         """
-        #filename = self.verifyInput()
         try:
             ifile = os.path.join("stp_domains", f"{filename}.json")
             with open(ifile, "r") as infile:
-                logging.info("\n[+] Input file was successfully loaded")
+                if not test:
+                    logging.info("\n[+] Input file was successfully loaded")
                 return json.load(infile)
         except FileNotFoundError:
             try: 
@@ -41,16 +41,20 @@ class STPUtils():
         logging.warning(f"\n[Ctrl-C] Shutting down ...")
         exit(0)
     
-    def provideOutfile(self, results, ofileName):
+    def provideOutfile(self, results, ofileName, test=False):
         """
         Functions provides an output file in a json format
         based on a provided dictionary
         """
         try:
+
+            if not ofileName:
+                ofileName = "dummy"
             filename = os.path.join("results", f"{ofileName}.json")
             with open(filename, "w") as outfile:
                 json.dump(results, outfile)
-                logging.info("[+] File was successfully created")
+                if not test:
+                    logging.info("[+] File was successfully created")
         except FileNotFoundError:
             logging.info("[-] The directory you are trying to use does not exist")
     
@@ -66,11 +70,14 @@ class STPUtils():
             infile =  sys.argv[1]
             outfile = sys.argv[2]
         except IndexError:
-            logging.info("[-] usage: ./run.py [infile] [outfile]")
             if not infile:
                 infile = input("\nPlease provide a name of the input file: ")
             if not outfile:
                 outfile = input("\nPlease provide a name of the output file: ")
+            
+            if infile == '' and outfile == '':
+                logging.info("\n[-] usage: ./run.py [infile] [outfile]")
+                exit(2)
         return infile, outfile
 
        
