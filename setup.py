@@ -12,10 +12,10 @@ setup (
         url='https://github.com/kamkug/STP-trainer',
         packages=[ 
                   'classes',
-                  'unittests'
+                  'unittests',
                   ],
         package_data={
-                        '': ['stp_domains/*.json', 'results/*.json' ]
+                        '': ['stp_domains/*.json', 'stp_domains/test/*.json', 'results/*.json' ]
                      },
         scripts=['run.py'],
       

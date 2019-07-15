@@ -6,12 +6,12 @@ Author: Kamil Kugler
 File: stpTrainer_test.py
 Purpose: Unit tests for STPTrainer class
 """
-
+import json
 import os
 from unittest import TestCase
 from classes.stpTrainer import STPTrainer
 from classes.utils import STPUtils
-#print(files)
+
 class STPTrainerTest(TestCase):
     """
     Class defines a test case suite for the STPTrainer class
@@ -33,16 +33,31 @@ class STPTrainerTest(TestCase):
         }
         """
         # collect, sort and remove extensions from filenames inside of stp_domains directory
-        domains = [ domain.split('.')[0] for domain in sorted(os.listdir('stp_domains')) ]
+        domains = [ domain.split('.')[0] for domain in sorted(os.listdir('stp_domains')) if domain.startswith('d') ]
         self.stp_domains = {}
-        for domain in domains[:5]: #domains:
+        #print(domains)
+        for domain in domains: #domains:
             stp_domain = STPUtils.getInfile(self, domain, True)
             self.stp_domains[domain] = STPTrainer(stp_domain, False).port_roles
-    
+        
     def testSTPTrainer(self):
         """
         Function is comparing the results of STPTrainer class against the actual correct cases results
         """
+        show = {}
+        files = [ domain for domain in os.listdir('stp_domains/test')  ]
+        files = sorted(files)
+        length = len(files)
+        
+        # iterate over each element and compare the results
+        for i in range(0,length):
+            with open('stp_domains/test/'+files[i], 'r') as domain:
+                show = json.load(domain)
+            self.assertEqual(self.stp_domains["domain"+str(i)], show)
+         
+
+
+"""
         test_against_those_cases =  [
                                     
                         [
@@ -87,11 +102,13 @@ class STPTrainerTest(TestCase):
                     
                     ]
 
-        counter = 0
+
+        #counter = 0
         for stp_domain in self.stp_domains:
             STPTrainerResult = self.stp_domains[stp_domain]
-            self.assertEqual(STPTrainerResult, test_against_those_cases[counter])
-            counter += 1
+            self.assertEqual(STPTrainerResult, test_against_those_cases)
+            #counter += 1
+"""
                                 
 
 

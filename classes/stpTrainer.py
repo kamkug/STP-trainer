@@ -1,5 +1,5 @@
 #!/usr/bin/python3.6
-
+import json
 from classes.utils import STPUtils
 import sys
 import logging
@@ -42,6 +42,8 @@ class STPTrainer():
             self.port_roles = self.getSwitchPortRoles(self.stp_domain)
         else:
             self.display()
+        #with open(
+        #print(json.dumps(self.port_roles["Blocking"]))
     def display(self):
         """
         Function displays the results in a human readable format
@@ -359,18 +361,31 @@ class STPTrainer():
         bp = []
         dp = []
         rp = []
-        port_roles = [bp, dp, rp]
+        port_roles =  {
+                        "Blocking": bp,
+                        "Designated": dp,
+                        "Root": rp
+                      }
+
+
+        #bp = []
+        #dp = []
+        #rp = []
+        #port_roles = [bp, dp, rp]
         for switch_name in stp_domain:
             switch = stp_domain[switch_name]
             for key in switch.keys():
                 if key.startswith('s'):
                     switch_in_question = switch[key]
                     if switch[key][2] == "BP":
-                        port_roles[0].append(( switch_in_question[4], switch_name ))
+                        #port_roles[0].append(( switch_in_question[4], switch_name ))
+                        bp.append([switch_in_question[4], switch_name ])
                     elif switch[key][2] == "DP":
-                        port_roles[1].append(( switch_in_question[4], switch_name ))
+                        #port_roles[1].append(( switch_in_question[4], switch_name ))
+                        dp.append([switch_in_question[4], switch_name])
                     else :
-                        port_roles[2].append(( switch_in_question[4], switch_name ))
+                        #port_roles[2].append(( switch_in_question[4], switch_name ))
+                        rp.append([switch_in_question[4], switch_name])
         return port_roles
 
     def getSwitchRole(self, stp_domain, switch_name, human_readable=True):
