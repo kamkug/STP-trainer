@@ -10,7 +10,8 @@ setup (
         author='Kamil Kugler',
         author_email='kamilkugler@gmail.com',
         url='https://github.com/kamkug/STP-trainer',
-        packages=[ 
+        packages=[
+                  '',
                   'classes',
                   'unittests',
                   ],
