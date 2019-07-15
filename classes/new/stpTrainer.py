@@ -35,13 +35,17 @@ class STPTrainer():
         self.setRootPathCostForNotDirectlyConnected()
         self.verifyCostBetweenNotDirectlyConnectedDevices()
         self.calculateCostsForNonRootPorts()
-        self.setRootPathCostForAll()  #<---new
-        self.setDesignatedPorts()   
-        self.setBlockingPorts()
+        for item in stp_domain:
+            print(self.stp_domain[item])
+        #self.setDesignatedPorts()   
+#        print(stp_domain['s2'])
+ #       print(stp_domain['s1'])
+        #self.setBlockingPorts()
         if not self.verbosity:
             self.port_roles = self.getSwitchPortRoles(self.stp_domain)
         else:
             self.display()
+        #print(stp_domain[2]) 
     def display(self):
         """
         Function displays the results in a human readable format
@@ -170,26 +174,6 @@ class STPTrainer():
                         local["lowest"] = neighbor_name
                         local[neighbor_name][2] = "RP"
         return directly_connected_dict
-    
-    def setRootPathCostForAll(self):        
-        """
-        Function identifies root ports for all of the remaining switches
-        """
-        for switch_name in self.stp_domain:
-            switch = self.stp_domain[switch_name]
-            if switch_name != self.root_bridge:
-                lowest_root_cost = switch[switch["lowest"]][1]
-                current_best_port = switch[switch["lowest"]]
-                for key in switch.keys():
-                    if key != self.root_bridge and key.startswith("s"):
-                        root_cost_through_neighbor = switch[key][1]
-                        new_best_port  = switch[key]
-                        if root_cost_through_neighbor < lowest_root_cost:
-                            #print(best_current_port)
-                            current_best_port[2] = 'none'
-                            new_best_port[2] = 'RP'
-
-
 
 
     def setRootPathCostForNotDirectlyConnected(self):
@@ -229,7 +213,9 @@ class STPTrainer():
                     link_to_neighbor_cost = local[neighbor_name][0]
                     neighbor_root_path_cost = neighbor[neighbor["lowest"]][1]
                     local[neighbor_name][1] = link_to_neighbor_cost + neighbor_root_path_cost
-                    if local[local["lowest"]][1] == local[neighbor_name][1]:                                    # in case of a cost tie
+                    if local["lowest"] == '':    # add inital RP if none exist 
+                        self.setNewRootPort(local, neighbor_name, False)
+                    elif local[local["lowest"]][1] == local[neighbor_name][1]:                            # in case of a cost tie
                         if self.stp_domain[local["lowest"]]["bridgeID"] > self.stp_domain[neighbor_name]["bridgeID"]:     # look at the bidge ID of neighboring switches, the lower one wins
                             self.setNewRootPort(local, neighbor_name)                                                # re-assign appropriate roles (if necessary)
                     elif local[local["lowest"]][1] > local[neighbor_name][1]:    # if the local lowest distance is bigger than the Root path cost for the neighboring switch
@@ -259,6 +245,8 @@ class STPTrainer():
                             link_to_neighbor_cost =  local[neighbor_name][0]
                             neighbor_selected_path_cost = lowest_cost_key + link_to_neighbor_cost
                             local[neighbor_name][1] = neighbor_selected_path_cost
+        #print(self.stp_domain)
+       # return self.stp_domain
 
     def setDesignatedPorts(self):
         """
@@ -272,6 +260,7 @@ class STPTrainer():
                     neighbor = self.stp_domain[neighbor_name] # define possible neighbors
                     if neighbor_name in local and neighbor_name != self.root_bridge: # exclude root bridge from neighbors search
                         neighbor_lowest_root_cost = neighbor[neighbor["lowest"]][1]# + neighbor[switch_name][0]
+                        #print(neighbor[switch_name][0] + neighbor_lowest_root_cost)
                         local_lowest_root_cost = local[local["lowest"]][1]
                         if local[neighbor_name][2] == "RP":
                             neighbor[switch_name][2] = "DP"
@@ -284,10 +273,18 @@ class STPTrainer():
                             else:
                                 local[neighbor_name][2] = "BP"
                                 neighbor[switch_name][2] = "DP"
+                print()
+                        #elif neighbor_lowest_root_cost < local_lowest_root_cost:
+                            #print(f"{neighbor_lowest_root_cost} on {neighbor_name} is lower than {local_lowest_root_cost} on {switch_name}")
+                            #print(local[local["lowest"]][2])
+                         #   local[neighbor_name][2] = "RP"
+                          #  local[local["lowest"]][2] = "none"
+                           # local["lowest"] = neighbor_name
         # set all root bridges ports to be DP
         for item in self.stp_domain[self.root_bridge]:
             if item.startswith('s'):
                 self.stp_domain[self.root_bridge][item][2] = "DP"
+    #    return self.stp_domain
     
     def setBlockingPorts(self):
         """
