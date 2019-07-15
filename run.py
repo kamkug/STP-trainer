@@ -14,7 +14,7 @@ try:
     infile, outfile, verbosity = utils.getCommandLineArguments()
     stp_domain = utils.getInfile(infile)
     stpDomain = STPTrainer(stp_domain, verbosity)
-    utils.provideOutfile(stpDomain.stp_domain, outfile)
+    #utils.provideOutfile(stpDomain.stp_domain, outfile)
     #port_roles = stpDomain.getSwitchPortRoles(stp_domain)
     #print(port_roles)
     #utils.provideOutfile(port_roles, outfile)
