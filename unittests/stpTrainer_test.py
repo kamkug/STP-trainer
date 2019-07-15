@@ -7,7 +7,7 @@ File: stpTrainer_test.py
 Purpose: Unit tests for STPTrainer class
 """
 
-
+import os
 from unittest import TestCase
 from classes.stpTrainer import STPTrainer
 from classes.utils import STPUtils
@@ -19,8 +19,8 @@ class STPTrainerTest(TestCase):
     
     def setUp(self):
         """
-        Function creates a dictionary of results for STPTrainer runs on given domain names.
-        The result is given in the following format:
+        Function creates a dictionary of results for STPTrainer runs on domains collected
+        from stp_domains directory. Subsequently the result is given in the following format:
         { 
             "domain_name" : [
                                 [ (blocking_port_name, blocking_port_id), ... ],
@@ -32,14 +32,13 @@ class STPTrainerTest(TestCase):
         
         }
         """
-
-        domains = ["domain0", "domain1", "domain2", "domain3", "domain4"]
+        # collect, sort and remove extensions from filenames inside of stp_domains directory
+        domains = [ domain.split('.')[0] for domain in sorted(os.listdir('stp_domains')) ]
         self.stp_domains = {}
-        for domain in domains:
+        for domain in domains[:5]: #domains:
             stp_domain = STPUtils.getInfile(self, domain, True)
             self.stp_domains[domain] = STPTrainer(stp_domain, False).port_roles
-        #return self.stp_domains     
-
+    
     def testSTPTrainer(self):
         """
         Function is comparing the results of STPTrainer class against the actual correct cases results
@@ -65,7 +64,7 @@ class STPTrainerTest(TestCase):
                         [
                             
                             [ (2, 's3') ],
-                            [ (3, 's1'), (4, 's2'), (1, 's4'), (2, 's4') ],                    # (2, 's3')], [(3, 's1'), (4, 's2'), (1, 's4')
+                            [ (3, 's1'), (4, 's2'), (1, 's4'), (2, 's4') ],                   
                             [ (4, 's1'), (1, 's2'), (3, 's3') ]
 
                         ],

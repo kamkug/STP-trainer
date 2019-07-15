@@ -4,6 +4,7 @@ from classes.utils import *
 from classes.stpTrainer import STPTrainer
 import sys
 import logging
+import os
 
 logging.basicConfig(format='%(message)s', level=logging.INFO)
 
