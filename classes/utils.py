@@ -72,7 +72,9 @@ class STPUtils():
                             choices= [
                                         "bridgeID",
                                         "distToNeighbor",
-                                        "portID"
+                                        "portID",
+                                        "role",
+                                        "rootPort"
                                      ]
                             )
         parser.add_argument("-p", "--port-name", type=str, dest="port_name", help="name of the port")

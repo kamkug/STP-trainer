@@ -51,7 +51,11 @@ class STPTrainer():
             self.getSwitchLinkToNeighborCost(self.port, self.switch_label)
         elif self.option == "bridgeID":
             self.getSwitchBridgeID(self.switch_label)
-
+        elif self.option == "role":
+            self.getSwitchRole(self.switch_label)
+        elif self.option == "rootPort":
+            self.getSwitchRootPort(switch_label)
+    
     def calculateCostsForNonRootPorts(self):
         """
         Function is calculating non root paths
@@ -401,24 +405,16 @@ class STPTrainer():
                         "Root": rp
                       }
 
-
-        #bp = []
-        #dp = []
-        #rp = []
-        #port_roles = [bp, dp, rp]
         for switch_name in self.stp_domain:
             switch = self.stp_domain[switch_name]
             for key in switch.keys():
                 if key.startswith('s'):
                     switch_in_question = switch[key]
                     if switch[key][2] == "BP":
-                        #port_roles[0].append(( switch_in_question[4], switch_name ))
                         bp.append([switch_in_question[4], switch_name ])
                     elif switch[key][2] == "DP":
-                        #port_roles[1].append(( switch_in_question[4], switch_name ))
                         dp.append([switch_in_question[4], switch_name])
                     else :
-                        #port_roles[2].append(( switch_in_question[4], switch_name ))
                         rp.append([switch_in_question[4], switch_name])
         return port_roles
 
@@ -435,14 +431,14 @@ class STPTrainer():
         except KeyError:
             logging.info("[-] This switch is not a part of provided stp domain")
 
-    def getSwitchRootPort(self, stp_domain, switch_name, human_readable=True):
+    def getSwitchRootPort(self, switch_name):
         """
         Function if successfull returns a tuple in the form:
         (next_hop_device_to_the_root_port, egress_port_ID)
         else returns None
         """
         try:
-            switch_in_question = stp_domain[switch_name]
+            switch_in_question = self.stp_domain[switch_name]
             if switch_in_question["role"] != "root":
                 best_next_hop_switch = switch_in_question["lowest"]
                 root_port_ID = switch_in_question[best_next_hop_switch][4]
