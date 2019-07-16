@@ -21,12 +21,15 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 ### ------------------------------------CLASS-----------------------------------------
 class STPTrainer():
-    def __init__(self, stp_domain, verbosity, switch_label=None, port=None, option=None):
+    def __init__(self, stp_domain, verbosity, infile=None, outfile=None, switch_label=None, port=None, option=None):
         self.counter = 655362555 # setting the counter to the highest possible value
+        self.infile = infile
         self.option = option
+        self.outfile = outfile
         self.port = port
         self.stp_domain = stp_domain
         self.switch_label = switch_label
+        self.utils = STPUtils()
         self.verbosity = verbosity
         # define who is a root bridge
         self.root_bridge = self.setRootBridge()
@@ -41,21 +44,32 @@ class STPTrainer():
         self.setRootPathCostForAll()  
         self.setDesignatedPorts()   
         self.setBlockingPorts()
-        if  self.verbosity == 0:
-            self.port_roles = self.getSwitchPortRoles()
-        elif self.verbosity >=2:
+        if self.verbosity >= 2:
             self.display()
+        
+        
         if self.option == "portID":
             self.getSwitchPortPriorityAndID(self.port, self.switch_label)
         elif self.option == "distToNeighbor":
             self.getSwitchLinkToNeighborCost(self.port, self.switch_label)
         elif self.option == "bridgeID":
             self.getSwitchBridgeID(self.switch_label)
+        elif self.option == "fullOutput":
+            if outfile == None:
+                self.outfile = self.infile
+            self.utils.provideOutfile(self.stp_domain, self.outfile, verbosity)
         elif self.option == "role":
             self.getSwitchRole(self.switch_label)
         elif self.option == "rootPort":
             self.getSwitchRootPort(switch_label)
-    
+        elif self.option == "smallerOutputFile":
+            if outfile == None:
+                self.outfile = self.infile
+            self.port_roles = self.getSwitchPortRoles()
+            self.utils.provideOutfile(self.port_roles, self.outfile, verbosity)
+   
+
+
     def calculateCostsForNonRootPorts(self):
         """
         Function is calculating non root paths
