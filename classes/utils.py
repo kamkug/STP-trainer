@@ -13,7 +13,7 @@ class STPUtils():
         # start listening for a SIGINT
         signal.signal(signal.SIGINT, self.keyboardInterruptHandler)
     
-    def getInfile(self, filename, test=False):
+    def getInfile(self, filename, verbosity):
         """
         Function does return a stp_domain
         derived from a provided json file.
@@ -22,7 +22,7 @@ class STPUtils():
         try:
             ifile = os.path.join("stp_domains", f"{filename}.json")
             with open(ifile, "r") as infile:
-                if not test:
+                if verbosity!=1 >= 0:
                     logging.info("\n[+] Input file was successfully loaded")
                 return json.load(infile)
         except FileNotFoundError:
@@ -42,7 +42,7 @@ class STPUtils():
         logging.warning(f"\n[Ctrl-C] Shutting down ...")
         exit(0)
     
-    def provideOutfile(self, results, ofileName, test=False):
+    def provideOutfile(self, results, ofileName, verbosity):
         """
         Functions provides an output file in a json format
         based on a provided dictionary
@@ -54,7 +54,7 @@ class STPUtils():
             filename = os.path.join("results", f"{ofileName}.json")
             with open(filename, "w") as outfile:
                 json.dump(results, outfile)
-                if not test:
+                if verbosity != 1 >= 0:
                     logging.info("[+] File was successfully created")
         except FileNotFoundError:
             logging.info("[-] The directory you are trying to use does not exist")
@@ -65,14 +65,22 @@ class STPUtils():
         it will alert the user
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument("-i", "--infile", dest="infile", type=str, help="the input file")
+        parser.add_argument("-i", "--infile", dest="infile", type=str, required=True, help="the input file")
+        parser.add_argument("-n", "--switch_name", dest="switch_name", type=str, help="switch name to be used")
         parser.add_argument("-o", "--outfile", dest="outfile", type=str, help="the output file")
-        parser.add_argument("-v", "--verbosity", action="store_true", dest="verbosity")
+        parser.add_argument("-g", "--get-me", dest="option", type=str, help="desired information query",\
+                            choices= [
+                                        "portID"
+                                     ]
+                            )
+        parser.add_argument("-p", "--port-name", type=str, dest="port_name", help="name of the port")
+        parser.add_argument("-v", "--verbosity", action="count", dest="verbosity", default=0)
         args = parser.parse_args()
         
         if args.infile != None: #or args.outfile != None:
-            print(args)
-            return args.infile, args.outfile, args.verbosity
+            if args.verbosity >= 4:
+                print(args)
+            return args.infile, args.option, args.outfile, args.port_name, args.switch_name,args.verbosity
         else:
             return self.verifyInput(args.verbosity)
             
