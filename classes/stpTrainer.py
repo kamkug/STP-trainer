@@ -21,7 +21,7 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 ### ------------------------------------CLASS-----------------------------------------
 class STPTrainer():
-    def __init__(self, stp_domain, verbosity, infile=None, outfile=None, switch_label=None, port=None, option=None):
+    def __init__(self, stp_domain, verbosity, infile=None, outfile=None, switch_label=None, port=None, option=None, test=False):
         self.counter = 655362555 # setting the counter to the highest possible value
         self.infile = infile
         self.option = option
@@ -29,6 +29,7 @@ class STPTrainer():
         self.port = port
         self.stp_domain = stp_domain
         self.switch_label = switch_label
+        self.test = test
         self.utils = STPUtils()
         self.verbosity = verbosity
         # define who is a root bridge
@@ -67,6 +68,9 @@ class STPTrainer():
                 self.outfile = self.infile
             self.port_roles = self.getSwitchPortRoles()
             self.utils.provideOutfile(self.port_roles, self.outfile, verbosity)
+        
+        if self.test == True:
+            self.port_roles = self.getSwitchPortRoles()
         
     
 

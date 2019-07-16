@@ -16,7 +16,7 @@ try:
     arguments = utils.getCommandLineArguments()
     stp_domain = utils.getInfile(infile, verbosity)
     stpDomain = STPTrainer(stp_domain, verbosity, infile=infile, outfile=outfile, option=option, switch_label=switch_name, port=port)
-    print(stpDomain.port_roles)
+    #print(stpDomain.port_roles)
     #utils.provideOutfile(stp_domain, outfile, verbosity)
 except  EOFError:
     logging.info("\n[Ctrl-D] Shutting down...")
