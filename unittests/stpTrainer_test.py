@@ -34,12 +34,12 @@ class STPTrainerTest(TestCase):
         """
         # collect, sort and remove extensions from filenames inside of stp_domains directory
         domains = [ domain.split('.')[0] for domain in sorted(os.listdir('stp_domains')) if domain.startswith('d') ]
+        domains = sorted(domains)
         self.stp_domains = {}
-        #print(domains)
+        print(domains)
         for domain in domains: #domains:
-            stp_domain = STPUtils.getInfile(self, domain, True)
-            self.stp_domains[domain] = STPTrainer(stp_domain, False).port_roles
-        
+            stp_domain = STPUtils.getInfile(self, domain, verbosity=1)
+            self.stp_domains[domain] = STPTrainer(stp_domain, verbosity=1, option="smallerOutputFile").port_roles
     def testSTPTrainer(self):
         """
         Function is comparing the results of STPTrainer class against the actual correct cases results
@@ -54,4 +54,3 @@ class STPTrainerTest(TestCase):
             with open('stp_domains/test/'+files[i], 'r') as domain:
                 show = json.load(domain)
             self.assertEqual(self.stp_domains["domain"+str(i)], show)
-         

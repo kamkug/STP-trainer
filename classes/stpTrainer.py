@@ -46,7 +46,7 @@ class STPTrainer():
         self.setBlockingPorts()
         if self.verbosity >= 2:
             self.display()
-        
+         
         
         if self.option == "portID":
             self.getSwitchPortPriorityAndID(self.port, self.switch_label)
@@ -67,8 +67,8 @@ class STPTrainer():
                 self.outfile = self.infile
             self.port_roles = self.getSwitchPortRoles()
             self.utils.provideOutfile(self.port_roles, self.outfile, verbosity)
-   
-
+        
+    
 
     def calculateCostsForNonRootPorts(self):
         """
