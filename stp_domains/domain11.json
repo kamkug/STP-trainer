@@ -1,0 +1,41 @@
+{
+    "s1": {
+        "bridgeID": 327681,
+        "s3" : [4, 0, "none", 128, 3],
+        "s2" : [19, 0, "none", 128, 4],
+        "lowest" : "",
+        "name": "s1",
+        "role": "none"
+
+    },
+
+    "s2": {
+        "bridgeID": 327682,
+        "s1" : [19, 0, "none", 128, 4],
+        "s4" : [4, 0, "none", 128, 1],
+        "lowest" : "",
+        "name": "s2",
+        "role": "none"
+
+    },  
+
+    "s3": {
+        "bridgeID": 40963,
+        "s1" : [4, 0, "none", 128, 3],
+        "s4" : [64, 0, "none", 128, 2],
+        "lowest": "", 
+        "name": "s3",    
+        "role": "none"
+
+    },
+
+    "s4" :{
+        "bridgeID": 327824,
+        "s2" : [4, 0, "none", 128, 1],
+        "s3" : [64, 0, "none", 128, 2],
+        "lowest": "",
+        "name": "s4",        
+        "role": "none"
+
+    }
+}

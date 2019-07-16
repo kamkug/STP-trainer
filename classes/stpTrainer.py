@@ -48,7 +48,7 @@ class STPTrainer():
         if self.verbosity >= 2:
             self.display()
          
-        
+     
         if self.option == "portID":
             self.getSwitchPortPriorityAndID(self.port, self.switch_label)
         elif self.option == "distToNeighbor":
@@ -145,6 +145,7 @@ class STPTrainer():
             logging.info(f"Bridge role: {switch['role']}")
             logging.info(f"Bridge ID:  {switch['bridgeID']}")
             if switch["role"] != "root":   # no need to look for a root port on a root bridge
+            #    print(switch_name, " lowest is: ", switch[switch['lowest']][4])
                 logging.info(f"Root port: {switch[switch['lowest']][4]}")
             for key in switch.keys():   # make sure that there are any designated ports
                 if key.startswith('s') and switch[key][2] == "DP":
@@ -153,7 +154,7 @@ class STPTrainer():
             for key in switch.keys():   # make sure that there are any blocking ports
                 if key.startswith('s') and switch[key][2] == "BP":
                     blocking_ports.append(str(switch[key][4]))
-            logging.info(f"Blocking ports: {', '.join(blocking_ports) if blocking_ports else 'None'}")
+            
             logging.info(40 * '-')
 
     def setBlockingPorts(self):
@@ -166,6 +167,7 @@ class STPTrainer():
                 if key.startswith('s'):
                     if switch[key][2] == 'none':
                         switch[key][2] = "BP"
+        return self.stp_domain
 
     def setDesignatedPorts(self):
         """
@@ -287,6 +289,7 @@ class STPTrainer():
                         if root_cost_through_neighbor < lowest_root_cost:
                             #print(best_current_port)
                             current_best_port[2] = 'none'
+                            switch["lowest"] = key  #<-- new
                             new_best_port[2] = 'RP'
 
     def setRootPathCostForNotDirectlyConnected(self):
