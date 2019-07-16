@@ -48,9 +48,7 @@ class STPTrainer():
         if self.option == "portID":
             self.getSwitchPortPriorityAndID(self.port, self.switch_label)
         elif self.option == "distToNeighbor":
-            self.getSwitchLinkToNeighborCost(self.port, self.switch_label)
-        elif self.option == "bridgeID":
-            self.getSwitchBridgeID(self.switch_label)
+            self.getSwitchLinkCostToNeighbor(self.port, self.switch_label)
 
     def calculateCostsForNonRootPorts(self):
         """
@@ -325,7 +323,7 @@ class STPTrainer():
             else:
                 return switch_bridge_ID
         except KeyError:
-            logging.info("[-] This switch is not a part of provided stp domain")
+            logging.info("[-] This switch is not a part of this stp domain")
 
  
 
@@ -345,7 +343,7 @@ class STPTrainer():
             right_switch = True
             if self.verbosity == 1:
                 if  local_name not in self.stp_domain :
-                    logging.info("[-] This switch is not a part of provided stp domain")
+                    logging.info("[-] This switch is not a part of this stp domain")
                     right_switch = False
                 if right_switch:
                     if neighbor_name not in self.stp_domain[local_name] and neighbor_name == local_name:
@@ -353,7 +351,7 @@ class STPTrainer():
                         exit(2)
                     elif neighbor_name not in self.stp_domain[local_name]:
                         logging.info(f"[-] This switch does not connect to {neighbor_name}")
-#            logging.info("[-] This switch is not a part of provided stp domain")
+#            logging.info("[-] This switch is not a part of this stp domain")
 
 
     def getSwitchPortPriorityAndID(self, interface_name, local_name):
@@ -374,7 +372,7 @@ class STPTrainer():
             right_switch = True
             if self.verbosity == 1:
                 if  local_name not in self.stp_domain :
-                    logging.info("[-] This switch is not a part of provided stp domain")
+                    logging.info("[-] This switch is not a part of this stp domain")
                     right_switch = False
 
                 if right_switch:
@@ -433,7 +431,7 @@ class STPTrainer():
             
             return switch_role
         except KeyError:
-            logging.info("[-] This switch is not a part of provided stp domain")
+            logging.info("[-] This switch is not a part of this stp domain")
 
     def getSwitchRootPort(self, stp_domain, switch_name, human_readable=True):
         """
@@ -456,7 +454,7 @@ class STPTrainer():
                 logging.info("[-] This is a root bridge")
 
         except KeyError:
-            logging.info("[-] This switch is not a part of provided stp domain")
+            logging.info("[-] This switch is not a part of this stp domain")
 
 
             

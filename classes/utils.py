@@ -70,6 +70,8 @@ class STPUtils():
         parser.add_argument("-o", "--outfile", dest="outfile", type=str, help="the output file")
         parser.add_argument("-g", "--get-me", dest="option", type=str, help="desired information query",\
                             choices= [
+                                        "bridgeID",
+                                        "distToNeighbor",
                                         "portID"
                                      ]
                             )
