@@ -43,6 +43,7 @@ class STPTrainerTest(TestCase):
         """
         Function is comparing the results of STPTrainer class against the actual correct cases results
         """
+        self.maxDiff = None
         show = {}
         files = [ domain for domain in os.listdir('stp_domains/test')  ]
         files = sorted(files)
@@ -52,5 +53,10 @@ class STPTrainerTest(TestCase):
         for item in self.stp_domains:
             with open('stp_domains/test/'+files[i], 'r') as domain:
                 show = json.load(domain)
-            self.assertEqual(self.stp_domains[item],show)
+                print(item)
+                if self.stp_domains[item] == show :
+                    print(f"[+] Test case for {item} was: successful")
+                else:
+                    print(f"[-] Test case for {item} was: unsuccessful")
+                self.assertEqual(self.stp_domains[item], show)
             i += 1

@@ -15,7 +15,7 @@ def main():
     test_suite = test_loader.loadTestsFromTestCase(STPTrainerTest)
 
     # get the runner to execute the test with an appropriate level of verbosity
-    test_runner = unittest.TextTestRunner(verbosity=2)
+    test_runner = unittest.TextTestRunner(verbosity=5)
 
     # perform an actual test
     test_runner.run(test_suite)

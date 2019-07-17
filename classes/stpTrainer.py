@@ -71,7 +71,7 @@ class STPTrainer():
         
         if self.test == True:
             self.port_roles = self.getSwitchPortRoles()
-        
+    
     
 
     def calculateCostsForNonRootPorts(self):
@@ -154,7 +154,7 @@ class STPTrainer():
             for key in switch.keys():   # make sure that there are any blocking ports
                 if key.startswith('s') and switch[key][2] == "BP":
                     blocking_ports.append(str(switch[key][4]))
-            
+            logging.info(f"Blocking ports: {', '.join(blocking_ports) if blocking_ports else 'None'}") 
             logging.info(40 * '-')
 
     def setBlockingPorts(self):
