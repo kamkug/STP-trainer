@@ -68,16 +68,16 @@ class STPTrainer():
         elif self.option == "fullOutput":
             if outfile == None:
                 self.outfile = self.infile
-            self.utils.provideOutfile(self.stp_domain, self.outfile, verbosity)
+            self.utils.provideOutfile(self.stp_domain, self.outfile, self.verbosity)
         elif self.option == "role":
             self.getSwitchRole(self.switch_label)
         elif self.option == "rootPort":
             self.getSwitchRootPort(switch_label)
         elif self.option == "smallerOutputFile":
-            if outfile == None:
+            if self.outfile == None:
                 self.outfile = self.infile
             self.port_roles = self.getSwitchPortRoles()
-            self.utils.provideOutfile(self.port_roles, self.outfile, verbosity)
+            self.utils.provideOutfile(self.port_roles, self.outfile, self.verbosity)
 
 
 
