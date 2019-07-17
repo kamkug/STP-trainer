@@ -45,8 +45,20 @@ class STPTrainer():
         self.setRootPathCostForAll()  
         self.setDesignatedPorts()   
         self.setBlockingPorts()
+        
         if self.verbosity >= 2:
             self.display()
+        self.useOption()
+        if self.test == True:
+            self.port_roles = self.getSwitchPortRoles()
+    
+    def useOption(self):
+        """
+        Function performs checks on whether any of the options were selected
+        and subsequently executes appropriate methods.
+        For any output to be displayed to the user the verbosity of level 1 needs to be selected,
+        otherwise only the particular data is returned.
+        """
         if self.option == "portID":
             self.getSwitchPortPriorityAndID(self.port, self.switch_label)
         elif self.option == "distToNeighbor":
@@ -66,11 +78,8 @@ class STPTrainer():
                 self.outfile = self.infile
             self.port_roles = self.getSwitchPortRoles()
             self.utils.provideOutfile(self.port_roles, self.outfile, verbosity)
-        
-        if self.test == True:
-            self.port_roles = self.getSwitchPortRoles()
-    
-    
+
+
 
     def calculateCostsForNonRootPorts(self):
         """

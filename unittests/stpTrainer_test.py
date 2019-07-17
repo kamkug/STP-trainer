@@ -49,14 +49,15 @@ class STPTrainerTest(TestCase):
         files = sorted(files)
         length = len(files)
         i = 0
+        print("\n") 
         # iterate over each element and compare the results
         for item in self.stp_domains:
             with open('stp_domains/test/'+files[i], 'r') as domain:
                 show = json.load(domain)
-                print(item)
                 if self.stp_domains[item] == show :
                     print(f"[+] Test case for {item} was: successful")
                 else:
                     print(f"[-] Test case for {item} was: unsuccessful")
                 self.assertEqual(self.stp_domains[item], show)
             i += 1
+        print()
