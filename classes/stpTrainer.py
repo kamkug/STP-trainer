@@ -47,9 +47,6 @@ class STPTrainer():
         self.setBlockingPorts()
         if self.verbosity >= 2:
             self.display()
-        #for domain in self.stp_domain:
-        #    print(self.stp_domain[domain] )
-        #print(self.stp_domain['s3']) 
         if self.option == "portID":
             self.getSwitchPortPriorityAndID(self.port, self.switch_label)
         elif self.option == "distToNeighbor":
