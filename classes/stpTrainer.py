@@ -47,8 +47,9 @@ class STPTrainer():
         self.setBlockingPorts()
         if self.verbosity >= 2:
             self.display()
-         
-     
+        #for domain in self.stp_domain:
+        #    print(self.stp_domain[domain] )
+        #print(self.stp_domain['s3']) 
         if self.option == "portID":
             self.getSwitchPortPriorityAndID(self.port, self.switch_label)
         elif self.option == "distToNeighbor":
@@ -274,23 +275,27 @@ class STPTrainer():
         return directly_connected_dict
     
     def setRootPathCostForAll(self):        
+        
         """
         Function identifies root ports for all of the remaining switches
         """
-        for switch_name in self.stp_domain:
-            switch = self.stp_domain[switch_name]
-            if switch_name != self.root_bridge:
-                lowest_root_cost = switch[switch["lowest"]][1]
-                current_best_port = switch[switch["lowest"]]
-                for key in switch.keys():
-                    if key != self.root_bridge and key.startswith("s"):
-                        root_cost_through_neighbor = switch[key][1]
-                        new_best_port  = switch[key]
-                        if root_cost_through_neighbor < lowest_root_cost:
-                            #print(best_current_port)
-                            current_best_port[2] = 'none'
-                            switch["lowest"] = key  #<-- new
-                            new_best_port[2] = 'RP'
+
+        for local_name in self.stp_domain:
+            if local_name != self.root_bridge:
+                local = self.stp_domain[local_name]
+            for neighbor_name in self.stp_domain:
+                neighbor = self.stp_domain[neighbor_name]
+                if local_name in neighbor and local_name != neighbor:
+                    if local_name != self.root_bridge:
+                        if neighbor["lowest"] != '':
+                            updated_lowest_cost_through_neighbor = neighbor[neighbor["lowest"]][1] + local[neighbor_name][0]
+                            lowest_current_root_path_cost = local[local["lowest"]][1]
+                            if updated_lowest_cost_through_neighbor  < lowest_current_root_path_cost:
+                                local[local["lowest"]][2] = "none"
+                                local["lowest"] = neighbor_name
+                                local[local["lowest"]][2] = "RP"
+                                local[local["lowest"]][1] = updated_lowest_cost_through_neighbor
+    
 
     def setRootPathCostForNotDirectlyConnected(self):
         """
